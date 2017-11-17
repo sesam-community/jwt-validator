@@ -10,17 +10,24 @@ from werkzeug.exceptions import BadRequest
 
 app = Flask (__name__)
 
-@app.route('/', methods=["POST"])
-def receive():
+@app.route('/<path:path>', methods=["POST"])
+def receive(path):
     digest = checksums(request)
     sha256 = hashlib.sha256(request.data).hexdigest()
 
     if digest == sha256:
         logger.info("jwt valid: sending to node")
-        if "node_jwt_token" in os.environ:
-            r = requests.post(os.environ.get('endpoint_url'), data=request.data, headers={'Authorization':'bearer '+ os.environ.get("node_jwt_token")})
+
+        if os.environ.get('base_endpoint_url') is not None:
+            endpoint = os.environ.get('base_endpoint_url') + path
         else:
-            r = requests.post(os.environ.get('endpoint_url'), data=request.data)
+            logger.info("base_endpoint_url is not provided")
+            return Response(response="Sesam microservice error: Base url does not resolve", status=500, mimetype='application/json')
+
+        if "node_jwt_token" in os.environ:
+            r = requests.post(endpoint, data=request.data, headers={'Authorization':'bearer '+ os.environ.get("node_jwt_token")})
+        else:
+            r = requests.post(endpoint, data=request.data)
         if r.status_code == 200:
             return Response(response="Thanks", status=200, mimetype='application/json')
         else:
