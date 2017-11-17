@@ -12,8 +12,10 @@ app = Flask (__name__)
 
 @app.route('/<path:path>', methods=["POST"])
 def receive(path):
+    data = request.stream.read()
     digest = checksums(request)
-    sha256 = hashlib.sha256(request.data).hexdigest()
+
+    sha256 = hashlib.sha256(data).hexdigest()
     endpoint = ""
 
     if digest == sha256:
@@ -25,10 +27,11 @@ def receive(path):
             logger.info("base_endpoint_url is not provided")
             return Response(response="Sesam microservice error: Base url does not resolve", status=500, mimetype='application/json')
 
-        if "node_jwt_token" in os.environ:
-            r = requests.post(endpoint, data=request.data, headers={'Authorization':'bearer '+ os.environ.get("node_jwt_token")})
+        if "node_jwt" in os.environ:
+            r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json', 'Authorization':'bearer '+ os.environ.get("node_jwt")
+            })
         else:
-            r = requests.post(endpoint, data=request.data)
+            r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json'})
         if r.status_code == 200:
             return Response(response="Thanks", status=200, mimetype='application/json')
         else:
