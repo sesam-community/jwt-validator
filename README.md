@@ -25,6 +25,7 @@ path param received = foobar/entities
     "environment": {
       "base_endpoint_url":"http://localhost:5002/api/receivers/"#the endpoint where the data is going to be sent,
       "jwt_secret": "$SECRET(jwt_secret)"# key to validate jwt received ,
+      "jwt_leeway": "10" #seconds_leeway,
       "node_jwt_token": "$SECRET(the_node_token)", #needed when speaking to Sesam node
     },
     "image": "sesambuild/jwt-validator:latest",

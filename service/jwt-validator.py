@@ -14,6 +14,7 @@ app = Flask (__name__)
 def receive(path):
     digest = checksums(request)
     sha256 = hashlib.sha256(request.data).hexdigest()
+    endpoint = ""
 
     if digest == sha256:
         logger.info("jwt valid: sending to node")
@@ -48,7 +49,7 @@ def checksums(request):
 
     token = parts[1]
     logger.info("checking jwt validity")
-    jwt_parts = jwt.decode(token, os.environ.get('jwt_secret'), algorithms=['HS256'])
+    jwt_parts = jwt.decode(token, os.environ.get('jwt_secret'), leeway=int(os.environ.get('jwt_leeway')), algorithms=['HS256'])
 
     return jwt_parts.get('sha256')
 
