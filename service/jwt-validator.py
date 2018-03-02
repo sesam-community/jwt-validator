@@ -28,7 +28,7 @@ def receive(path):
 
         if "node_jwt" in os.environ:
             r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json', 'Authorization':'bearer '+ os.environ.get("node_jwt")
-            },verify=bool(os.environ.get('verify_ssl', "True")))
+            },verify=str_to_bool(os.environ.get('verify_ssl', "True")))
         else:
             r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json'})
         if r.status_code == 200:
@@ -37,6 +37,9 @@ def receive(path):
             return Response(response="Sesam node error", status=500, mimetype='application/json')
     else:
         return Response(response="Token did not validate", status=401, mimetype='application/json')
+
+def str_to_bool(string_input):
+    return str(string_input).lower() == "true"
 
 def checksums(request):
     parts = request.headers.get('Authorization').split()
