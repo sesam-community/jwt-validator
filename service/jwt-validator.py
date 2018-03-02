@@ -15,10 +15,9 @@ def receive(path):
     data = request.stream.read()
     digest = checksums(request)
 
-    sha256 = hashlib.sha256(data).hexdigest()
-    endpoint = ""
+    hashed_data= getattr(hashlib, digest.get('algorithm').lower())(data).hexdigest()
 
-    if digest == sha256:
+    if digest.get('digest') == hashed_data:
         logger.info("jwt valid: sending to node")
 
         if os.environ.get('base_endpoint_url') is not None:
@@ -29,7 +28,7 @@ def receive(path):
 
         if "node_jwt" in os.environ:
             r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json', 'Authorization':'bearer '+ os.environ.get("node_jwt")
-            })
+            },verify=bool(os.environ.get('verify_ssl', "True")))
         else:
             r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json'})
         if r.status_code == 200:
@@ -54,7 +53,7 @@ def checksums(request):
     logger.info("checking jwt validity")
     jwt_parts = jwt.decode(token, os.environ.get('jwt_secret'), leeway=int(os.environ.get('jwt_leeway')), algorithms=['HS256'])
 
-    return jwt_parts.get('sha256')
+    return {'digest':jwt_parts.get('digest'), 'algorithm': jwt.get_unverified_header(token).get('digestAlgorithm')}
 
 if __name__ == '__main__':
     format_string = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
