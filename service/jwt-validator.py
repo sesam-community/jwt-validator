@@ -30,7 +30,8 @@ def receive(path):
             r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json', 'Authorization':'bearer '+ os.environ.get("node_jwt")
             },verify=str_to_bool(os.environ.get('verify_ssl', "True")))
         else:
-            r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json'})
+            r = requests.post(endpoint, data=data, headers={'Content-Type':'application/json'},
+                              verify=str_to_bool(os.environ.get('verify_ssl', "True")))
         if r.status_code == 200:
             return Response(response="Thanks", status=200, mimetype='application/json')
         else:
