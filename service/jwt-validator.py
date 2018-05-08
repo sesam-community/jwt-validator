@@ -35,7 +35,7 @@ def receive(path):
         if r.status_code == 200:
             return Response(response="Thanks", status=200, mimetype='application/json')
         else:
-            return Response(response="Sesam node error", status=500, mimetype='application/json')
+            return Response(response=r.text, status=r.status_code, mimetype='application/json')
     else:
         return Response(response="Token did not validate", status=401, mimetype='application/json')
 
